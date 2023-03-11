@@ -17,4 +17,15 @@ public class FlickrImage
     public string AppendedUrl { get; set; }
 
     public IList<string> ImageSizePathes { get; set; }
+
+
+    public FlickrImage(string imageUrl)
+    {
+        ImageUrl = imageUrl;
+    }
+
+    public string GetFileName()
+    {
+        return FilteredUrl.Split('/').Last();
+    }
 }
