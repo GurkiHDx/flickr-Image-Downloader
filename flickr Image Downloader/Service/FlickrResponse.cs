@@ -1,4 +1,5 @@
-﻿using HtmlAgilityPack;
+﻿using System.Configuration;
+using HtmlAgilityPack;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using OpenQA.Selenium;
@@ -9,6 +10,13 @@ namespace flickr_Image_Downloader.Service;
 
 public class FlickrResponse : IFlickrResponse
 {
+    private readonly string _inputUrl;
+
+    public FlickrResponse(string inputUrl)
+    {
+        _inputUrl = inputUrl;
+    }
+
     public string GetHtmlResponse(string url)
     {
         string htmlResponse;
@@ -20,11 +28,11 @@ public class FlickrResponse : IFlickrResponse
         return htmlResponse;
     }
 
-    public string GetHtml(string url)
+    private string GetChromePageSource(string url)
     {
         var options = new ChromeOptions
         {
-            BinaryLocation = @"C:\Program Files\Google\Chrome\Application\chrome.exe"
+            BinaryLocation = ConfigurationManager.AppSettings["chromeLocation"]
         };
 
         options.AddArguments("headless");
@@ -101,5 +109,12 @@ public class FlickrResponse : IFlickrResponse
     public string GetFilteredUrl(IEnumerable<string> imgPathFromHtmlResponse)
     {
         return imgPathFromHtmlResponse.FirstOrDefault(x => x.Contains("live.staticflickr"));
+    }
+
+    public IEnumerable<string> GetImageUrls()
+    {
+        var htmlResponse = GetChromePageSource(_inputUrl);
+        var imageUrls = GetImgPathFromHtmlResponse(htmlResponse);
+        return imageUrls;
     }
 }

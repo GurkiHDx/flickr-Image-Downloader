@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.Net.Mime;
+using System.Runtime.CompilerServices;
+using System.Text;
 using flickr_Image_Downloader.Interfaces;
 using flickr_Image_Downloader.Service;
 
@@ -20,14 +22,11 @@ class Program
             {
                 Console.WriteLine("Download from: " + inputUrl);
 
-                IFlickrResponse flickrResponse = new FlickrResponse();
-
-                var htmlResponse = flickrResponse.GetHtml(inputUrl);
-
-                var imageUrls = flickrResponse.GetImgPathFromHtmlResponse(htmlResponse);
-
                 UrlChecker urlChecker = new UrlChecker();
                 var checkedInputUrl = urlChecker.CheckInputUrl(inputUrl);
+
+                IFlickrResponse flickrResponse = new FlickrResponse(inputUrl);
+                var imageUrls = flickrResponse.GetImageUrls();
 
                 foreach (var imageUrl in imageUrls)
                 {
@@ -41,7 +40,7 @@ class Program
             }
             else if (inputUrl.Equals("exit") || inputUrl.Equals("Exit"))
             {
-                break;
+                return;
             }
             else
             {
@@ -57,16 +56,9 @@ class Program
         string checkedInputUrl,
         IFlickrResponse flickrResponse)
     {
-        string htmlResponse;
-        var checkedImageUrl = urlChecker.CheckImageUrl(imageUrl);
+        var appendedUrl = urlChecker.BuildImageUrl(checkedInputUrl, imageUrl);
 
-        var removeStartString = imageUrl.Remove(0, 30);
-        var resultString = removeStartString.Remove(11, removeStartString.Length - 11);
-
-        StringBuilder sb = new StringBuilder();
-        var appendedUrl = sb.Append(checkedInputUrl + checkedImageUrl + "/sizes/");
-
-        htmlResponse = flickrResponse.GetHtmlResponse(appendedUrl.ToString());
+        var htmlResponse = flickrResponse.GetHtmlResponse(appendedUrl.ToString());
 
         var sizePathFromHtmlResponse = flickrResponse.GetSizePathFromHtmlResponse(htmlResponse);
 
@@ -78,6 +70,7 @@ class Program
         var lastImageUrl = "http://flickr.com" + lastImagePair.Value;
 
         var lastImageResponse = flickrResponse.GetHtmlResponse(lastImageUrl);
+
         var imgPathFromHtmlResponse = flickrResponse.GetImgPathFromHtmlResponse(lastImageResponse);
 
 
