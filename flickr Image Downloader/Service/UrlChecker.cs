@@ -42,4 +42,18 @@ public class UrlChecker
     }
 
 
+    public string BuildImageUrl(string checkedInputUrl, string imageUrl)
+    {
+        var checkedImageUrl = CheckImageUrl(imageUrl);
+
+        var removeStartString = imageUrl.Remove(0, 30);
+        var resultString = removeStartString.Remove(11, removeStartString.Length - 11);
+
+        StringBuilder sb = new StringBuilder();
+        var appendedUrl = sb.Append(checkedInputUrl + checkedImageUrl + "/sizes/").ToString();
+
+        return appendedUrl;
+    }
+
+
 }
