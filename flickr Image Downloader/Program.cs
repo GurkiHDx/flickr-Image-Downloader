@@ -6,8 +6,6 @@ class Program
 {
     static void Main(string[] args)
     {
-       // var url = "https://www.flickr.com/photos/dmtoh/";
-
         Console.WriteLine("-= flickr Image Downloader by GurkiHDx =-");
 
         do
