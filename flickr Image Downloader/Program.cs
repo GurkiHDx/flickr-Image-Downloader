@@ -1,6 +1,7 @@
 ﻿using System.Net.Mime;
 using System.Runtime.CompilerServices;
 using System.Text;
+using flickr_Image_Downloader;
 using flickr_Image_Downloader.Interfaces;
 using flickr_Image_Downloader.Service;
 
@@ -56,14 +57,16 @@ class Program
         string checkedInputUrl,
         IFlickrResponse flickrResponse)
     {
-        var appendedUrl = urlChecker.BuildImageUrl(checkedInputUrl, imageUrl);
+        FlickrImage flickrImage = new FlickrImage();
+        flickrImage.ImageUrl = imageUrl;
+        flickrImage.AppendedUrl = urlChecker.BuildImageUrl(checkedInputUrl, imageUrl);
 
-        var htmlResponse = flickrResponse.GetHtmlResponse(appendedUrl.ToString());
+        flickrImage.HtmlResponse = flickrResponse.GetHtmlResponse(flickrImage.AppendedUrl);
 
-        var sizePathFromHtmlResponse = flickrResponse.GetSizePathFromHtmlResponse(htmlResponse);
+        flickrImage.ImageSizePathes = flickrResponse.GetSizePathFromHtmlResponse(flickrImage.HtmlResponse).ToList();
 
 
-        var imageHelper = new ImageHelper(sizePathFromHtmlResponse);
+        var imageHelper = new ImageHelper(flickrImage.ImageSizePathes);
         var lastImagePair = imageHelper.GetImagePair();
 
         var lastImageSize = lastImagePair.Key;
@@ -75,12 +78,13 @@ class Program
 
 
         var filteredUrl = flickrResponse.GetFilteredUrl(imgPathFromHtmlResponse);
-        var fileName = filteredUrl.Split('/').Last();
+
+        flickrImage.FileName = filteredUrl.Split('/').Last();
 
         // Console.WriteLine("Quality: {0} Url: {1}", lastImageSize, lastImageUrl);
 
-        IDownloader dl = new Downloader(filteredUrl, fileName);
+        IDownloader dl = new Downloader(filteredUrl, flickrImage.FileName);
         dl.Download();
-        return fileName;
+        return flickrImage.FileName;
     }
 }
